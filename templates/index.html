@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medical Text Summarization</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; margin: 50px; }
+        textarea { width: 80%; height: 150px; }
+        button { margin: 10px; padding: 10px; font-size: 16px; }
+        #summary { margin-top: 20px; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h2>Medical Report Summarization</h2>
+    <textarea id="inputText" placeholder="Enter medical text here..."></textarea><br>
+    <button onclick="summarizeText()">Summarize</button>
+    <p id="summary"></p>
+
+    <script>
+        async function summarizeText() {
+            const text = document.getElementById("inputText").value;
+            const response = await fetch("/summarize", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ text })
+            });
+            const result = await response.json();
+            document.getElementById("summary").innerText = "Summary: " + result.summary;
+        }
+    </script>
+</body>
+</html>
