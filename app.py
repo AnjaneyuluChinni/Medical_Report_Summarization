@@ -1,12 +1,9 @@
-import os
-from flask import Flask, request, jsonify, render_template
+import gradio as gr
 from transformers import T5Tokenizer, T5ForConditionalGeneration
 import torch
 
-app = Flask(__name__)
-
-# ✅ Load LOCAL model & tokenizer
-MODEL_PATH = "medical_summary_model"  # Ensure this is uploaded to GitHub
+# ✅ Load model & tokenizer
+MODEL_PATH = "medical_summary_model"  # Ensure this is uploaded
 tokenizer = T5Tokenizer.from_pretrained(MODEL_PATH)
 model = T5ForConditionalGeneration.from_pretrained(MODEL_PATH)
 
@@ -17,18 +14,16 @@ def summarize_text(text):
         summary_ids = model.generate(inputs.input_ids, max_length=128, num_beams=4, early_stopping=True)
     return tokenizer.decode(summary_ids[0], skip_special_tokens=True)
 
-@app.route('/')
-def home():
-    return render_template('index.html')
+# ✅ Create Gradio Interface
+demo = gr.Interface(
+    fn=summarize_text, 
+    inputs=gr.Textbox(lines=5, placeholder="Enter medical text here..."), 
+    outputs=gr.Textbox(),
+    title="Medical Report Summarization",
+    description="Enter medical text and get a summarized version using T5."
+)
 
-@app.route("/summarize", methods=["POST"])
-def summarize():
-    data = request.get_json()
-    if not data or "text" not in data:
-        return jsonify({"error": "No text provided"}), 400
-    
-    summary = summarize_text(data["text"])
-    return jsonify({"summary": summary})
-
+# ✅ Launch Gradio App
 if __name__ == "__main__":
-    app.run(debug=True)
+
+    demo.launch(share=True)
